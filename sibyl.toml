@@ -1,0 +1,2 @@
+[connectors]
+sibyl_demo_data_connector = { path = "./connectors/SibylDemoDataConnector" }
