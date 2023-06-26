@@ -1,0 +1,13 @@
+[package]
+name = "sibyl_demo_data_connector"
+version = "1.0.0"
+edition = "2018"
+license = "MIT"
+readme = "README.md"
+include = ["src/**/*.rs", "README.md"]
+
+[dependencies]
+
+[features]
+default = ["mesalock_sgx"]
+mesalock_sgx = []
