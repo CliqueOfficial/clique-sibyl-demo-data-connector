@@ -33,15 +33,7 @@ impl DataConnector for DemoConnector {
           {}",
           url, host, post_body.len(), post_body 
         );
-        let plaintext = match tls_post(host, &req, port.try_into().unwrap()) {
-          Ok(r) => r,
-          Err(e) => {
-            let err = format!("tls_post to str: {:?}", e);
-            println!("{:?}", err);
-            return Err(NetworkError::String(err));
-          }
-        };
-        simple_tls_client(host, &req, port.try_into().unwrap(), "demo")
+        simple_tls_client(host, &req, port.try_into().unwrap())
       },
       "demo_get" => {
         let host = query_param["host"].as_str().unwrap_or("");
@@ -54,7 +46,7 @@ impl DataConnector for DemoConnector {
           Accept: */*\r\n\r\n", 
           url, host 
         );
-        simple_tls_client(host, &req, port.try_into().unwrap(), "demo")
+        simple_tls_client(host, &req, port.try_into().unwrap())
       },
       _ => {
         Err(NetworkError::String(format!("Unexpected query_type: {:?}", query_type)))
