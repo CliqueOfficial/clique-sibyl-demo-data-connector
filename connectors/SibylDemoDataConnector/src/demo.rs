@@ -1,20 +1,20 @@
 use std::prelude::v1::*;
-use sibyl_base_data_connector::utils::tls_post;
+use sibyl_base_data_connector::utils::simple_tls_client;
 use sibyl_base_data_connector::base::DataConnector;
-use sibyl_base_data_connector::serde_json::json;
 use sibyl_base_data_connector::serde_json::Value;
+use sibyl_base_data_connector::errors::NetworkError;
 use std::convert::TryInto;
 
 pub struct DemoConnector {}
 
 impl DataConnector for DemoConnector {
-  fn query(&self, query_type: &Value, query_param: &Value) -> Result<Value, String> {
+  fn query(&self, query_type: &Value, query_param: &Value) -> Result<Value, NetworkError> {
     let query_type_str = match query_type.as_str() {
       Some(r) => r,
       _ => {
         let err = format!("query_type to str failed");
         println!("{:?}", err);
-        return Err(err);
+        return Err(NetworkError::String(err));
       }
     };
     match query_type_str {
@@ -38,15 +38,10 @@ impl DataConnector for DemoConnector {
           Err(e) => {
             let err = format!("tls_post to str: {:?}", e);
             println!("{:?}", err);
-            return Err(err);
+            return Err(NetworkError::String(err));
           }
         };
-        let reason = "".to_string();
-        let result: Value = json!(std::str::from_utf8(&plaintext).unwrap_or("Error parse utf8 str from raw bytes"));
-        Ok(json!({
-            "result": result,
-            "reason": reason
-        }))
+        simple_tls_client(host, &req, port.try_into().unwrap(), "demo")
       },
       "demo_get" => {
         let host = query_param["host"].as_str().unwrap_or("");
@@ -59,23 +54,10 @@ impl DataConnector for DemoConnector {
           Accept: */*\r\n\r\n", 
           url, host 
         );
-        let plaintext = match tls_post(host, &req, port.try_into().unwrap()) {
-          Ok(r) => r,
-          Err(e) => {
-            let err = format!("tls_post to str: {:?}", e);
-            println!("{:?}", err);
-            return Err(err);
-          }
-        };
-        let reason = "".to_string();
-        let result: Value = json!(std::str::from_utf8(&plaintext).unwrap_or("Error parse utf8 str from raw bytes"));
-        Ok(json!({
-          "result": result,
-          "reason": reason
-        }))
+        simple_tls_client(host, &req, port.try_into().unwrap(), "demo")
       },
       _ => {
-        Err(format!("Unexpected query_type: {:?}", query_type))
+        Err(NetworkError::String(format!("Unexpected query_type: {:?}", query_type)))
       }
     }
   }
